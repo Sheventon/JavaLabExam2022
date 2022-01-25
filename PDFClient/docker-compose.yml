@@ -1,0 +1,69 @@
+version: '3.3'
+
+services:
+
+  application:
+    image:
+      javalab-image
+    container_name: 'javalab'
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
+      - redis
+      - rabbitmq
+      - generator
+    environment:
+      - "SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/JavalabExam"
+      - "SPRING_DATASOURCE_USERNAME=postgres"
+      - "SPRING_DATASOURCE_PASSWORD=2029"
+      - "REDIS_HOST=redis"
+      - "REDIS_PORT=6379"
+      - "RABBITMQ_HOST=rabbitmq"
+      - "RABBITMQ_PORT=5672"
+      - "RABBITMQ_VHOST=/"
+      - "RABBITMQ_USERNAME=guest"
+      - "RABBITMQ_PASSWORD=guest"
+
+  redis:
+    image:
+      redis
+    container_name: 'redis'
+    ports:
+      - 6379:6379
+
+  rabbitmq:
+    container_name: "rabbitmq"
+    image: rabbitmq:3.8-management-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  database:
+    image:
+      postgres
+    container_name: 'postgres'
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: JavalabExam
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2029
+
+  generator:
+    image:
+      pdf-generator-image
+    container_name: pdf-generator
+    depends_on:
+      - rabbitmq
+    ports:
+      - 8081:8081
+
+volumes:
+  pgdata:
+    external: true
+  redis-volume:
+    external: true
